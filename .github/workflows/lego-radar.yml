@@ -23,9 +23,40 @@ jobs:
           python -m pip install --upgrade pip
           python -m pip install -e .
 
-      - name: Sync LEGO Architecture
+ - name: Sync LEGO Architecture
         env:
           REBRICKABLE_API_KEY: ${{ secrets.REBRICKABLE_API_KEY }}
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
         run: |
           PYTHONPATH=src python -m python_project sync
+
+      - name: Send Telegram test
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: |
+          python - <<'PY'
+          import json
+          import os
+          import urllib.request
+
+          token = os.environ["TELEGRAM_BOT_TOKEN"]
+          chat_id = os.environ["TELEGRAM_CHAT_ID"]
+
+          url = f"https://api.telegram.org/bot{token}/sendMessage"
+
+          data = json.dumps({
+              "chat_id": chat_id,
+              "text": "🤖 LEGO Deal Radar connecté !\n\n🧱 Synchronisation Architecture OK."
+          }).encode()
+
+          request = urllib.request.Request(
+              url,
+              data=data,
+              headers={"Content-Type": "application/json"},
+              method="POST",
+          )
+
+          with urllib.request.urlopen(request) as response:
+              print(response.read().decode())
+          PY
