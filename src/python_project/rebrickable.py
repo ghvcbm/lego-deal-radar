@@ -25,29 +25,57 @@ class RebrickableClient:
 
     def _get_url(self, url: str, **query: str | int) -> dict:
         if query:
-            url = f"{url}?{urlencode({key: value for key, value in query.items() if value != ''})}"
+            params = {
+                key: value
+                for key, value in query.items()
+                if value != ""
+            }
+            url = f"{url}?{urlencode(params)}"
+
         return request_json(
             url,
-            headers={"Authorization": f"key {self.api_key}"},
+            headers={
+                "Authorization": f"key {self.api_key}",
+            },
         )
 
-    def _paginate(self, path: str, **query: str | int) -> Iterator[dict]:
+    def _paginate(
+        self,
+        path: str,
+        **query: str | int,
+    ) -> Iterator[dict]:
         """Yield every result from a Rebrickable paginated endpoint."""
+
         page = 1
+
         while True:
-            response = self._get(path, page=page, **query)
+            response = self._get(
+                path,
+                page=page,
+                **query,
+            )
+
             results = response.get("results")
+
             if not isinstance(results, list):
-                raise APIError("Rebrickable returned an invalid paginated response.")
-            yield from (result for result in results if isinstance(result, dict))
+                raise APIError(
+                    "Rebrickable returned an invalid paginated response."
+                )
+
+            for result in results:
+                if isinstance(result, dict):
+                    yield result
 
             next_url = response.get("next")
+
             if not next_url:
                 break
+
             page += 1
 
     def find_architecture_theme(self) -> dict:
-        """Find the theme whose name is exactly ``Architecture``."""
+        """Find the theme whose name is exactly 'Architecture'."""
+
         for theme in self._paginate(
             "themes/",
             search=ARCHITECTURE_THEME_NAME,
@@ -55,27 +83,47 @@ class RebrickableClient:
         ):
             if theme.get("name") == ARCHITECTURE_THEME_NAME:
                 return theme
-        raise APIError(f'Rebrickable theme "{ARCHITECTURE_THEME_NAME}" was not found.')
 
-        def get_architecture_sets(self) -> list[dict]:
-            """Retrieve all sets belonging to the exact Architecture theme."""
-            theme = self.find_architecture_theme()
-            theme_id = theme.get("id")
+        raise APIError(
+            f'Rebrickable theme "{ARCHITECTURE_THEME_NAME}" was not found.'
+        )
 
-            if not isinstance(theme_id, int):
-                raise APIError("Rebrickable returned an invalid Architecture theme ID.")
+    def get_architecture_sets(self) -> list[dict]:
+        """Retrieve all sets belonging to the Architecture theme."""
 
-            return list(
-                self._paginate(
-                    "sets/",
-                    theme_id=theme_id,
-                    page_size=1000,
-                )
+        theme = self.find_architecture_theme()
+
+        theme_id = theme.get("id")
+
+        if not isinstance(theme_id, int):
+            raise APIError(
+                "Rebrickable returned an invalid Architecture theme ID."
             )
+
+        return list(
+            self._paginate(
+                "sets/",
+                theme_id=theme_id,
+                page_size=1000,
+            )
+        )
+
     def get_set(self, set_number: str) -> dict:
         """Return details for one LEGO set."""
-        return self._get(f"sets/{quote(set_number, safe='')}/")
 
-    def search_sets(self, search: str, page_size: int = 10) -> dict:
+        return self._get(
+            f"sets/{quote(set_number, safe='')}/"
+        )
+
+    def search_sets(
+        self,
+        search: str,
+        page_size: int = 10,
+    ) -> dict:
         """Search LEGO sets by name or number."""
-        return self._get("sets/", search=search, page_size=page_size)
+
+        return self._get(
+            "sets/",
+            search=search,
+            page_size=page_size,
+        )
