@@ -22,6 +22,18 @@ On Replit, add both values as Secrets, then start the configured
 `LEGO Deal Radar Bot` workflow. The workflow runs the bot from this directory
 and keeps it listening for Telegram updates.
 
+## GitHub Actions secrets
+
+The scheduled workflow in `.github/workflows/lego-radar.yml` runs the
+Architecture synchronization every 15 minutes independently of Replit. Add
+these repository secrets in GitHub:
+
+- `REBRICKABLE_API_KEY` — your Rebrickable API key.
+- `TELEGRAM_BOT_TOKEN` — your Telegram bot token.
+
+The workflow passes both values through GitHub Actions environment variables;
+neither credential is stored in the repository.
+
 ## Run it
 
 From the project directory, with `src` on the Python path:
