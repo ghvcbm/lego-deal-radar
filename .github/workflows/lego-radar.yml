@@ -26,7 +26,6 @@ jobs:
       - name: Sync LEGO Architecture
         env:
           REBRICKABLE_API_KEY: ${{ secrets.REBRICKABLE_API_KEY }}
-          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
         run: |
           PYTHONPATH=src python -m python_project sync
 
@@ -47,7 +46,7 @@ jobs:
 
           data = json.dumps({
               "chat_id": chat_id,
-              "text": "🤖 LEGO Deal Radar connecté !\n\n🧱 Synchronisation Architecture OK."
+              "text": "🤖 LEGO Deal Radar connecté !\n\n🧱 52 LEGO Architecture synchronisés."
           }).encode()
 
           request = urllib.request.Request(
