@@ -28,4 +28,4 @@ jobs:
           REBRICKABLE_API_KEY: ${{ secrets.REBRICKABLE_API_KEY }}
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
         run: |
-          lego-deal-radar sync
+          PYTHONPATH=src python -m python_project sync
