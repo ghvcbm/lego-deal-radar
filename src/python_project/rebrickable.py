@@ -57,14 +57,21 @@ class RebrickableClient:
                 return theme
         raise APIError(f'Rebrickable theme "{ARCHITECTURE_THEME_NAME}" was not found.')
 
-    def get_architecture_sets(self) -> list[dict]:
-        """Retrieve all sets belonging to the exact Architecture theme."""
-        theme = self.find_architecture_theme()
-        theme_id = theme.get("id")
-        if not isinstance(theme_id, int):
-            raise APIError("Rebrickable returned an invalid Architecture theme ID.")
-        return list(self._paginate(f"themes/{theme_id}/sets/", page_size=100))
+        def get_architecture_sets(self) -> list[dict]:
+            """Retrieve all sets belonging to the exact Architecture theme."""
+            theme = self.find_architecture_theme()
+            theme_id = theme.get("id")
 
+            if not isinstance(theme_id, int):
+                raise APIError("Rebrickable returned an invalid Architecture theme ID.")
+
+            return list(
+                self._paginate(
+                    "sets/",
+                    theme_id=theme_id,
+                    page_size=1000,
+                )
+            )
     def get_set(self, set_number: str) -> dict:
         """Return details for one LEGO set."""
         return self._get(f"sets/{quote(set_number, safe='')}/")
