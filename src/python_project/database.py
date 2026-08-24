@@ -57,7 +57,6 @@ def connect(path: str | None = None) -> sqlite3.Connection:
 
 def initialize(connection: sqlite3.Connection) -> None:
     """Create the database schema if it does not exist."""
-
     connection.execute(
         """
         CREATE TABLE IF NOT EXISTS architecture_sets (
@@ -88,24 +87,7 @@ def initialize(connection: sqlite3.Connection) -> None:
         )
         """
     )
-    connection.execute(
-        """
-        CREATE TABLE IF NOT EXISTS listings (
-            id TEXT NOT NULL,
-            marketplace TEXT NOT NULL,
-            title TEXT NOT NULL,
-            price REAL NOT NULL,
-            url TEXT NOT NULL,
-            image_url TEXT,
-            seller_name TEXT,
-            description TEXT,
-            score REAL,
-            first_seen_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-            updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-            PRIMARY KEY (marketplace, id)
-        )
-        """
-    )
+
     connection.commit()
 
 
