@@ -264,3 +264,21 @@ def upsert_listing(
         )
 
     return existing is None
+
+cat >> src/python_project/database.py <<'PY'
+
+
+def save_listings(
+    connection: sqlite3.Connection,
+    listings: Iterable[ListingRecord],
+) -> list[ListingRecord]:
+    """Save listings and return only listings seen for the first time."""
+
+    new_listings: list[ListingRecord] = []
+
+    for listing in listings:
+        if upsert_listing(connection, listing):
+            new_listings.append(listing)
+
+    return new_listings
+PY
