@@ -1,4 +1,4 @@
-from marketplace import Marketplace, Listing
+from .marketplace import Marketplace, Listing
 
 
 class VintedMarketplace(Marketplace):
