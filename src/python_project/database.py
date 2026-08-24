@@ -203,3 +203,64 @@ def upsert_listing(
         )
 
     return existing is None
+
+def upsert_listing(
+    connection: sqlite3.Connection,
+    listing: ListingRecord,
+) -> bool:
+    """
+    Insert or update a marketplace listing.
+
+    Returns True if the listing is new.
+    Returns False if it already existed.
+    """
+
+    existing = connection.execute(
+        """
+        SELECT 1
+        FROM listings
+        WHERE marketplace = ? AND id = ?
+        """,
+        (listing.marketplace, listing.id),
+    ).fetchone()
+
+    with connection:
+        connection.execute(
+            """
+            INSERT INTO listings (
+                id,
+                marketplace,
+                title,
+                price,
+                url,
+                image_url,
+                seller_name,
+                description,
+                score
+            )
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ON CONFLICT (marketplace, id)
+            DO UPDATE SET
+                title = excluded.title,
+                price = excluded.price,
+                url = excluded.url,
+                image_url = excluded.image_url,
+                seller_name = excluded.seller_name,
+                description = excluded.description,
+                score = excluded.score,
+                updated_at = CURRENT_TIMESTAMP
+            """,
+            (
+                listing.id,
+                listing.marketplace,
+                listing.title,
+                listing.price,
+                listing.url,
+                listing.image_url,
+                listing.seller_name,
+                listing.description,
+                listing.score,
+            ),
+        )
+
+    return existing is None
